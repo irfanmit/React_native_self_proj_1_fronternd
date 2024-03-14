@@ -1,0 +1,1 @@
+# React_native_self_proj_1_fronternd
