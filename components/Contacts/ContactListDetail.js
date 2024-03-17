@@ -5,7 +5,8 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  FlatList
+  FlatList,
+  ActivityIndicator
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
@@ -30,11 +31,14 @@ export default function ContactListDetail(props) {
   const [message, setMessage] = useState(""); // State to manage input value
   const [arrivalMessgae, setArrivalMessage] = useState();
   const [fetchedMessages, setFetchedMessages] = useState([]);
+  const [sending, setSending] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   const handleAddMsg = async () => {
+    setSendingMessage(true);
     try {
-      await addMsg(currentUserNo, ToUserNo, message);
-      // Clear the input after sending the message
+      await addMsg(currentUserNo, ToUserNo, message, setSendingMessage);
+      setSendingMessage(false);
       setMessage("");
       socket.current.emit("send-msg", {
         to: ToUserNo,
@@ -52,7 +56,7 @@ export default function ContactListDetail(props) {
   };
 
   useEffect(() => {
-      socket.current = io("http://192.168.202.161:8000");
+      socket.current = io("http://192.168.1.24:8000");
       socket.current.emit("add-user", currentUserNo);
     
   }, [currentUserNo, ToUserNo]);
@@ -73,12 +77,15 @@ export default function ContactListDetail(props) {
   }, [arrivalMessgae]);
 
   useEffect(() => {
+    setSending(true);
     const fetchData = async () => {
       if (currentUserNo && ToUserNo) {
         try {
-          const data = await getMsg(currentUserNo, ToUserNo);
+          const data = await getMsg(currentUserNo, ToUserNo, setSending);
+          setSending(false);
           setFetchedMessages(data);
         } catch (error) {
+          setSending(false);
           console.error("Error fetching data:", error);
         }
       }
@@ -86,10 +93,24 @@ export default function ContactListDetail(props) {
 
     fetchData();
   }, [currentUserNo, ToUserNo]);
+  
 
   return (
     <View style={styles.container}>
-      <View style={{ backgroundColor: "green", width: "100%", height: "80%" }}>
+    <View style={{ backgroundColor: "black", padding : 10, borderRadius : 10 }}>
+        <Text style={{ color: "white" }}>
+          {toUserName}
+        </Text>
+      </View>
+      <View style={{ backgroundColor: "green", width: "100%", height: "80%" , padding : 30,}}>
+      {fetchedMessages.length===0 &&  <View  style={{justifyContent : 'center', alignItems :  'center', marginTop : 300}}>
+      <Text>Start conversation</Text> 
+      </View>}
+      {sending? <View  style={{marginTop : 200}}>
+
+      <ActivityIndicator size='large' color = 'black' /> 
+      </View>
+      : ''}
         <FlatList
           data={fetchedMessages}
           renderItem={({ item }) => (
@@ -100,11 +121,7 @@ export default function ContactListDetail(props) {
           keyExtractor={(item, index) => index.toString()}
         />
       </View>
-      <View style={{ backgroundColor: "black" }}>
-        <Text style={{ color: "white" }}>
-          {toUserName} - {currentUserNo}
-        </Text>
-      </View>
+      
       <View style={styles.formContainer}>
         <TextInput
           style={styles.input}
@@ -113,7 +130,7 @@ export default function ContactListDetail(props) {
           onChangeText={setMessage}
         />
         <TouchableOpacity style={styles.sendButton} onPress={handleAddMsg}>
-          <Ionicons name="send" size={24} color="white" />
+          {sendingMessage ? <ActivityIndicator/> : <Ionicons name="send" size={24} color="white" />}
         </TouchableOpacity>
       </View>
     </View>
@@ -125,6 +142,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor :'grey'
   },
   formContainer: {
     flexDirection: "row",
@@ -133,7 +151,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    borderWidth: 1,
     borderColor: "gray",
     borderRadius: 5,
     paddingHorizontal: 10,

@@ -50,7 +50,7 @@ export default function ContactList() {
   };
 
   return (
-    <View>
+    <View style={{flex : 1, marginTop : 50}}>
       <TextInput
         style={styles.searchInput}
         placeholder="Search contacts..."
@@ -100,5 +100,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     margin: 10,
+    color : 'white'
   },
 });

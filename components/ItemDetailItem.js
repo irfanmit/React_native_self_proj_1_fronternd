@@ -1,5 +1,5 @@
 import * as React from "react";
-import { View, Text } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
 import { useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 
@@ -23,10 +23,13 @@ function ItemsDetailItem({ id }) {
   const ctx = useContext(Context);
 
   const [editing, setEditing] = React.useState(false);
+  const [sending, setSending] = React.useState(false)
 
-  const handlePressDeletion = async () => { // Define as async function
+  const handlePressDeletion = async () => { 
+    setSending(true);
     try {
-      const data = await task_deletion(id); // Call the taskDel function to delete item
+      const data = await task_deletion(id, setSending); 
+      setSending(false);
       ctx.set_to_do_Data(data);
       console.log('Data after deletion:', data);
       navigation.navigate('To-Do');
@@ -93,7 +96,7 @@ function ItemsDetailItem({ id }) {
           )}
         </View>
         <View>
-          <Ionicons name="trash-outline" size={40} onPress={() => {handlePressDeletion(item?._id)}} />
+         {sending ? <ActivityIndicator size = 'large' color='black' /> : <Ionicons name="trash-outline" size={40} onPress={() => {handlePressDeletion(item?._id)}} />}
         </View>
       </View>
       </View>

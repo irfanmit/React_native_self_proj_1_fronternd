@@ -14,13 +14,14 @@ export const ContextProvider = ({ children }) => {
   const navigation = useNavigation();
 
   //states
-  const [to_do_data, set_to_do_Data] = useState([]);
+  const [to_do_data, set_to_do_Data] = useState();
   const [contactsList, setContactLists] = useState([]);
   const [login , setLogin ] = useState(false);
   const [currentUserData , setCurrentUserData] = useState({
   }); 
   const [expoPushToken, setExpoPushToken] = useState("");
   const [token , setToken] = useState(null);
+  const [sending, setSending] = useState(false);
 
   const handlePressEdit = async (id, task_des) => {
     try {
@@ -53,7 +54,9 @@ export const ContextProvider = ({ children }) => {
     setExpoPushToken : setExpoPushToken,
     expoPushToken : expoPushToken,
     token : token,
-    setToken : setToken
+    setToken : setToken,
+    sending : sending,
+    setSending : setSending
   }
 
   return (

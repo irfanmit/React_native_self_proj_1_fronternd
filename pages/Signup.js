@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { View, Text, TextInput, Button } from "react-native";
+import { View, Text, TextInput, Button, ActivityIndicator } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
 
@@ -17,6 +17,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [mobileNo, setMobileNo] = useState("");
   const [Name, setName] = useState("");
+  const [sending, setSending] = useState(false);
 
   const navigation = useNavigation();
   const ctx = useContext(Context);
@@ -47,19 +48,24 @@ const Signup = () => {
   }, []);
 
   const handleSignup = async () => {
+    setSending(true);
     try {
       const data = await signup(
         username,
         password,
         mobileNo,
         ctx.value.expoPushToken,
-        Name
+        Name,
+        setSending
       );
       if (data) {
+        setSending(false);
         console.log("signup sucess");
         navigation.navigate("Login");
       }
-    } catch (err) {}
+    } catch (err) {
+      setSending(false)
+    }
   };
 
   return (
@@ -87,7 +93,7 @@ const Signup = () => {
         onChangeText={setMobileNo}
         keyboardType="phone-pad" // This sets the keyboard type to numeric
       />
-      <Button title="Signup" onPress={handleSignup} />
+      {sending? <ActivityIndicator/> : <Button title="Signup" onPress={handleSignup} />}
     </View>
   );
 };

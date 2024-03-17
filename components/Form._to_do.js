@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, TextInput } from 'react-native';
+import { View, TextInput, ActivityIndicator } from 'react-native';
 
 //icons
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -17,6 +17,7 @@ const Form_to_do = ({task_des_editing, editing, handlePressEdit, id}) => {
 
 
   const [task_des, setTask_des] = useState('');
+  const[sending, setSending] = useState(false);
   
   useEffect(() => {
     if (task_des_editing) {
@@ -28,16 +29,20 @@ const Form_to_do = ({task_des_editing, editing, handlePressEdit, id}) => {
 
   const handleAdd = async() => {
       try {
-        const data = await addTask(task_des);
+        setSending(true)
+        const data = await addTask(task_des, ctx.value.currentUserData._id, setSending);
+        setSending(false)
         ctx.set_to_do_Data(data);
         setTask_des('');
-        // console.log(ctx.to_do_data);
+        console.log(ctx.to_do_data);
       } catch (error) {
         console.error('Error adding task:', error);
       }
     };
 
-   
+   useEffect(() => {
+
+   },[ctx.to_do_data])
   
   
   return (
@@ -50,9 +55,9 @@ const Form_to_do = ({task_des_editing, editing, handlePressEdit, id}) => {
       />
       <View style={{marginRight : 8}}>
       {editing ? (  
-          <Ionicons name="send" size={30} onPress={() => ctx.value.handlePressEdit(id, task_des)} />
+        sending ?  <ActivityIndicator size = 'large' color='black' />  : <Ionicons name="send" size={30} onPress={() => ctx.value.handlePressEdit(id, task_des)} />
         ) : (
-          <Ionicons name="send" size={30} onPress={handleAdd} />
+          sending ? <ActivityIndicator /> : <Ionicons name="send" size={30} onPress={handleAdd} />
         )}
       </View>
     </View>

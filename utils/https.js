@@ -1,11 +1,11 @@
 import * as Contacts from "expo-contacts";
-import axios from 'axios';
+import axios from "axios";
 //context
 // import { useContext } from "react";
 // import { Context } from "../store/context";
 
 // const ctx = useContext(Context);
-const ip_add = "192.168.202.161";
+const ip_add = "192.168.1.24";
 
 import { io } from "socket.io-client";
 const socket = io.connect("http://localhost:800");
@@ -34,7 +34,8 @@ const socket = io.connect("http://localhost:800");
 //   }
 // };
 
-const toggleStatus = async (id) => {
+const toggleStatus = async (id, setSendingToggleStatus) => {
+  console.log(id);
   try {
     const response = await fetch(`http://${ip_add}:8000/User/togglevent`, {
       method: "POST",
@@ -45,6 +46,7 @@ const toggleStatus = async (id) => {
     });
 
     if (!response.ok) {
+      alert("Failed")
       throw new Error("Failed to toggle status");
     }
 
@@ -52,24 +54,29 @@ const toggleStatus = async (id) => {
     const data = await response.json();
     // console.log('Toggle status response:', data);
   } catch (error) {
+    setSendingToggleStatus(false);
+    alert("Failed")
     console.error("Error toggling status:", error);
     throw error; // Rethrow the error to handle it in the calling code
   }
 };
 
-const to_do_lists = async () => {
+const to_do_lists = async (id, setSendingToggleStatus) => {
   try {
-    const response = await fetch(`http://${ip_add}:8000/User/to_do_lists`);
+    const response = await fetch(`http://${ip_add}:8000/User/to_do_lists/${id}`);
     const data = await response.json();
     // console.log(data);
     return data;
   } catch (error) {
+    setSendingToggleStatus(false);
+    setSending
+    alert("Failed")
     console.error(error);
     return []; // Return an empty array in case of error
   }
 };
 
-const task_deletion = async (id) => {
+const task_deletion = async (id, setSending) => {
   try {
     const response = await fetch(`http://${ip_add}:8000/User/taskDel`, {
       method: "POST",
@@ -80,6 +87,8 @@ const task_deletion = async (id) => {
     });
 
     if (!response.ok) {
+      setSending(false);
+      alert("Failed")
       throw new Error("Failed to delte task");
     }
 
@@ -87,22 +96,28 @@ const task_deletion = async (id) => {
     const data = await response.json();
     return data;
   } catch (error) {
+    setSendingToggleStatus(false);
+    setSending(false);
+    alert("Failed")
     console.error("Error toggling status:", error);
     throw error; // Rethrow the error to handle it in the calling code
   }
 };
 
-const addTask = async (task_des) => {
+const addTask = async (task_des, id) => {
+  console.log(id);
   try {
     const response = await fetch(`http://${ip_add}:8000/User/addTask`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ task_des: task_des }),
+      body: JSON.stringify({ task_des, id }),
     });
 
     if (!response.ok) {
+      alert("Failed")
+      setSending(false)
       throw new Error("Failed to delte task");
     }
 
@@ -110,6 +125,8 @@ const addTask = async (task_des) => {
     const data = await response.json();
     return data;
   } catch (error) {
+    alert("Failed")
+    setSending(false)
     console.error("Error toggling status:", error);
     throw error; // Rethrow the error to handle it in the calling code
   }
@@ -126,6 +143,7 @@ const editTask = async (id, task_des) => {
     });
 
     if (!response.ok) {
+      alert("Failed")
       throw new Error("Failed to edit task");
     }
 
@@ -133,6 +151,7 @@ const editTask = async (id, task_des) => {
     const data = await response.json();
     return data;
   } catch (error) {
+    alert("Failed")
     console.error("Error toggling status:", error);
     throw error; // Rethrow the error to handle it in the calling code
   }
@@ -148,12 +167,13 @@ const contactListFetching = async (setContactLists) => {
       }
     }
   } catch (error) {
+    alert("Failed")
     console.error("Error fetching contact list:", error);
     // Handle the error here
   }
 };
 
-const signup = async (email, password, mobileNo, expoPushToken, Name) => {
+const signup = async (email, password, mobileNo, expoPushToken, Name, setSending) => {
   try {
     const response = await fetch(`http://${ip_add}:8000/signup`, {
       method: "POST",
@@ -164,18 +184,22 @@ const signup = async (email, password, mobileNo, expoPushToken, Name) => {
     });
 
     if (!response.ok) {
+      setSending(false);
+      alert("Failed")
       throw new Error("Failed to signup");
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
+    setSending(false);
+    alert("Failed")
     console.error("Error signing up:", error);
     throw error;
   }
 };
 
-const login = async (email, password) => {
+const login = async (email, password, setSending) => {
   try {
     const response = await fetch(`http://${ip_add}:8000/login`, {
       method: "POST",
@@ -186,6 +210,8 @@ const login = async (email, password) => {
     });
 
     if (!response.ok) {
+      alert("Failed")
+      setSending(false)
       throw new Error("Failed to login");
     }
 
@@ -193,12 +219,14 @@ const login = async (email, password) => {
     // console.log(data);
     return data;
   } catch (error) {
+    alert("Failed")
+    setSending(false)
     console.error("Error logging in:", error);
     throw error;
   }
 };
 
-const addMsg = async (From, to, message) => {
+const addMsg = async (From, to, message, setSendingMessage) => {
   try {
     const response = await fetch(`http://${ip_add}:8000/addMessage`, {
       method: "POST",
@@ -209,6 +237,7 @@ const addMsg = async (From, to, message) => {
     });
 
     if (!response.ok) {
+      setSendingMessage(false)
       throw new Error("Failed to add message");
     }
 
@@ -216,12 +245,14 @@ const addMsg = async (From, to, message) => {
     // console.log("Message added success");
     // return data;
   } catch (error) {
+    setSendingMessage(false)
+    alert("Failed")
     console.error("Error adding message :", error);
     throw error;
   }
 };
 
-const getMsg = async (From, to) => {
+const getMsg = async (From, to, setSending) => {
   try {
     const response = await fetch(`http://${ip_add}:8000/getMessage`, {
       method: "POST",
@@ -235,24 +266,36 @@ const getMsg = async (From, to) => {
     // console.log(data);
     return data; // Return the parsed data
   } catch (err) {
+    setSending(false);
+    alert("Failed")
     console.log("Error while getting messages: ", err);
     return { success: false, error: "Error while getting messages" };
   }
 };
 
-// const imageUploader = async (formData) => {
-//   try {
-//       const response = await axios.post('https://example.com', formData), {
-       
-//       if(!response.ok){
-//         console.log("bad response");
-//       }
-//     } catch (error) {
-//       console.error('Error uploading image:', error);
-//     }
-// }
+const postImage = async (data, setSending) => {
+  try {
+    const response = await axios.post(
+      "http://192.168.1.24:8000/Profile",
+      data,
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
-
+    const returnedData = response.data;
+    console.log("lgging before returning : ", returnedData);
+    return returnedData;
+  } catch (err) {
+    setSending(false);
+    alert("Failed")
+    console.log("failed to upload image ", err);
+    throw err;
+  }
+};
 
 export {
   to_do_lists,
@@ -266,5 +309,5 @@ export {
   addMsg,
   getMsg,
   socket,
-  // imageUploader,
+  postImage,
 };
